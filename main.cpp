@@ -260,14 +260,14 @@ void playGame() {
 
     char cmd;
     do{
-        for (int j = 0; j < columns[0].size(); j++) {
+        /*for (int j = 0; j < columns[0].size(); j++) {
             for (int i = 0; i < columns.size(); i++) {
                 if (columns[i].size() > j) {
                     std::cout << columns[i][j] << " ";
                 }
             }
             std::cout << std::endl;
-        }
+        }*/
         
         for (int i = 0; i < row; i++) {
             for (int j = 0; j < rows[i].size(); j++) {
@@ -285,7 +285,7 @@ void playGame() {
         std::cout << "You currently have " << mistakes << " lives." << std::endl;
         std::cout << std::endl;
 
-        std::cout << "If you wish to fill press f, if you wish to mark an empty spot press m, if you wish to check your nonogram press c(please note that you can lose lifes!) and if you wish to exit press e." << std::endl;
+        std::cout << "If you wish to fill press f, if you wish to mark an empty spot press m, if you wish to check your nonogram press c(please note that you can lose lives!) and if you wish to exit press e." << std::endl;
         std::cout << '>';
         std::cin >> cmd;
 
@@ -354,8 +354,8 @@ void loadGame() {
     strcat(solved_filename, ".txt");
 
     std::ifstream file_solved(solved_filename);
-    if (!file.is_open()) {
-        std::cout << "Error: Unable to open file." << std::endl;
+    if (!file_solved.is_open()) {
+        std::cout << "Error: Unable to open file1." << std::endl;
         return;
     }
 
