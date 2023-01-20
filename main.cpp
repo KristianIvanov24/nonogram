@@ -68,48 +68,62 @@ void userReg() {
     file.close();
 }
 
-std::vector<std::vector<int>> countRows(std::vector<std::vector<char>> matrix) {
-    int size = matrix.size();
-    std::vector<std::vector<int>> result;
-    result.resize(size);
-    for (int i = 0; i < size; i++) {
+void showNonogram(std::vector<std::vector<char>> matrix, int row, int col){
+    std::vector<std::vector<int>> rows;
+    rows.resize(row);
+    for (int i = 0; i < row; i++) {
         int count = 0;
-        for (int j = 0; j < size; j++) {
+        for (int j = 0; j < col; j++) {
             if (matrix[i][j] == '#') {
                 count++;
             }
             else if (matrix[i][j] == 'O' && count != 0) {
-                result[i].push_back(count);
+                rows[i].push_back(count);
                 count = 0;
             }
         }
         if (count != 0)
-            result[i].push_back(count);
+            rows[i].push_back(count);
     }
 
-    return result;
-}
-
-std::vector<std::vector<int>> countColumns(std::vector<std::vector<char>> matrix) {
-    int size = matrix.size();
-    std::vector<std::vector<int>> result;
-    result.resize(size);
-    for (int i = 0; i < size; i++) {
+    std::vector<std::vector<int>> columns;
+    columns.resize(col);
+    for (int i = 0; i < col; i++) {
         int count = 0;
-        for (int j = 0; j < size; j++) {
+        for (int j = 0; j < row; j++) {
             if (matrix[j][i] == '#') {
                 count++;
             }
             else if (matrix[j][i] == 'O' && count != 0) {
-                result[i].push_back(count);
+                columns[i].push_back(count);
                 count = 0;
             }
         }
         if (count != 0)
-            result[i].push_back(count);
+            columns[i].push_back(count);
     }
 
-    return result;
+    for (int j = 0; j < columns[0].size(); j++) {
+        for (int i = 0; i < columns.size(); i++) {
+            if (columns[i].size() > j) {
+                std::cout << columns[i][j] << " ";
+            }
+        }
+        std::cout << std::endl;
+    }
+        
+    for (int i = 0; i < row; i++) {
+        for (int j = 0; j < rows[i].size(); j++) {
+            std::cout << rows[i][j] << " ";
+        }
+        for (int j = 0; j < 8 - rows[i].size()*2; j++) {
+            std::cout << " ";
+        }
+        for (int j = 0; j < col; j++) { 
+            std::cout << matrix[i][j] << " ";
+        }
+        std::cout << std::endl;
+    }
 }
 
 void fillChunk(std::vector<std::vector<char>> &matrix){
@@ -237,55 +251,31 @@ void playGame() {
         return;
     }
 
-    std::vector<std::vector<char>> solved_matrix, player_matrix;
-    int row, col;
-
-    while (file >> row >> col) {
-        if (solved_matrix.size() < row + 1) {
-            solved_matrix.resize(row + 1);
-            player_matrix.resize(row + 1);
+    std::vector<std::vector<char>> solved_matrix;
+    char c;
+    while (file >> c) {
+        std::vector<char> row;
+        while (c != '\n' && !file.eof()) {
+            row.push_back(c);
+            file >> c;
         }
-        if (solved_matrix[row].size() < col + 1) {
-            solved_matrix[row].resize(col + 1);
-            player_matrix[row].resize(col + 1);
-        }
-
-        file >> solved_matrix[row][col];
-        player_matrix[row][col] = 'O';
+        solved_matrix.push_back(row);
     }
-
     file.close();
     
-    std::vector<std::vector<int>> rows = countRows(solved_matrix), columns = countColumns(solved_matrix);
+    int rows = solved_matrix.size();
+    int cols = solved_matrix[0].size();
+
+    std::vector<std::vector<char>> player_matrix(rows, std::vector<char>(cols, 'O'));
 
     char cmd;
     do{
-        /*for (int j = 0; j < columns[0].size(); j++) {
-            for (int i = 0; i < columns.size(); i++) {
-                if (columns[i].size() > j) {
-                    std::cout << columns[i][j] << " ";
-                }
-            }
-            std::cout << std::endl;
-        }*/
-        
-        for (int i = 0; i < row; i++) {
-            for (int j = 0; j < rows[i].size(); j++) {
-                std::cout << rows[i][j] << " ";
-            }
-            for (int j = 0; j < 8 - rows[i].size()*2; j++) {
-                std::cout << " ";
-            }
-            for (int j = 0; j < row; j++) { 
-                std::cout << player_matrix[i][j];
-            }
-            std::cout << std::endl;
-        }
+        showNonogram(player_matrix, rows, cols);
 
         std::cout << "You currently have " << mistakes << " lives." << std::endl;
         std::cout << std::endl;
 
-        std::cout << "If you wish to fill press f, if you wish to mark an empty spot press m, if you wish to check your nonogram press c(please note that you can lose lives!) and if you wish to exit press e." << std::endl;
+        std::cout << "If you wish to fill press f, if you wish to mark an empty spot press m, if you wish to check your nonogram press c and if you wish to exit press e." << std::endl;
         std::cout << '>';
         std::cin >> cmd;
 
@@ -311,7 +301,7 @@ void playGame() {
             }
             else mistakes--;
         }
-    }while(cmd == 'e' || mistakes == 0);
+    }while(cmd != 'e' || mistakes != 0);
 
     if(mistakes == 0){
         std::cout << "You've lost!" << std::endl;
@@ -360,49 +350,28 @@ void loadGame() {
     }
 
     std::vector<std::vector<char>> solved_matrix;
-    int row_solved, col_solved;
-    while (file_solved >> row_solved >> col_solved) {
-        if (solved_matrix.size() < row_solved + 1) {
-            solved_matrix.resize(row_solved + 1);
+    char c;
+    while (file >> c) {
+        std::vector<char> row;
+        while (c != '\n' && !file.eof()) {
+            row.push_back(c);
+            file >> c;
         }
-        if (solved_matrix[row_solved].size() < col_solved + 1) {
-            solved_matrix[row_solved].resize(col_solved + 1);
-        }
-
-        file_solved >> solved_matrix[row_solved][col_solved];
+        solved_matrix.push_back(row);
     }
-    file_solved.close();
+    file.close();
     
-    std::vector<std::vector<int>> rows = countRows(solved_matrix), columns = countColumns(solved_matrix);
+    int rows = solved_matrix.size();
+    int cols = solved_matrix[0].size();
 
     char cmd;
     do{
-        for (int j = 0; j < columns[0].size(); j++) {
-            for (int i = 0; i < columns.size(); i++) {
-                if (columns[i].size() > j) {
-                    std::cout << columns[i][j] << " ";
-                }
-            }
-            std::cout << std::endl;
-        }
-        
-        for (int i = 0; i < row; i++) {
-            for (int j = 0; j < rows[i].size(); j++) {
-                std::cout << rows[i][j] << " ";
-            }
-            for (int j = 0; j < 8 - rows[i].size()*2; j++) {
-                std::cout << " ";
-            }
-            for (int j = 0; j < row; j++) { 
-                std::cout << player_matrix[i][j];
-            }
-            std::cout << std::endl;
-        }
+        showNonogram(player_matrix, rows, cols);
 
         std::cout << "You currently have " << mistakes << " lives." << std::endl;
         std::cout << std::endl;
 
-        std::cout << "If you wish to fill press f, if you wish to mark an empty spot press m, if you wish to check your nonogram press c(please note that you can lose lifes!) and if you wish to exit press e." << std::endl;
+        std::cout << "If you wish to fill press f, if you wish to mark an empty spot press m, if you wish to check your nonogram press c and if you wish to exit press e." << std::endl;
         std::cout << '>';
         std::cin >> cmd;
 
@@ -428,7 +397,7 @@ void loadGame() {
             }
             else mistakes--;
         }
-    }while(cmd == 'e' || mistakes == 0);
+    }while(cmd != 'e' || mistakes != 0);
 
     if(mistakes == 0){
         std::cout << "You've lost!" << std::endl;
@@ -464,7 +433,7 @@ void Nonogram() {
 
         while (cmd != 'c' && cmd != 'n') {
             std::cout << "Invalid comand!" << std::endl;
-            std::cout << "If you wish to continue you last game at level " << level[0] << "press c and if you wish to play new game press n" << std::endl;
+            std::cout << "If you wish to continue you last game at level " << level[0] << " press c and if you wish to play new game press n" << std::endl;
             std::cout << '>';
             std::cin >> cmd;
         }
