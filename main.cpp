@@ -1,3 +1,18 @@
+/**
+*  
+* Solution to course project # 4
+* Introduction to programming course
+* Faculty of Mathematics and Informatics of Sofia University
+* Winter semester 2022/2023
+*
+* @author Kristian Ivanov
+* @idnumber 0MI0600137
+* @compiler VC
+*
+* <main file>
+*   
+*/
+
 #include <iostream>
 #include <fstream>
 #include <cstdlib>
@@ -14,7 +29,7 @@ bool verifyData() {
     std::ifstream file("users.txt");
 
     if (!file.is_open()) {
-        std::cout << "Error: Unable to open file." << std::endl;
+        std::cout << "Error: Unable to open file.1" << std::endl;
         return false;
     }
 
@@ -57,7 +72,7 @@ void userReg() {
     std::ofstream file("users.txt", std::ios::app);
 
     if (!file.is_open()) {
-        std::cout << "Error: Unable to open file." << std::endl;
+        std::cout << "Error: Unable to open file.2" << std::endl;
         return;
     }
 
@@ -68,7 +83,7 @@ void userReg() {
     file.close();
 }
 
-void showNonogram(std::vector<std::vector<char>> matrix, int row, int col){
+void showNonogram(std::vector<std::vector<char>> matrix, int row, int col, std::vector<std::vector<char>> player_matrix){
     std::vector<std::vector<int>> rows;
     rows.resize(row);
     for (int i = 0; i < row; i++) {
@@ -103,26 +118,24 @@ void showNonogram(std::vector<std::vector<char>> matrix, int row, int col){
             columns[i].push_back(count);
     }
 
-    for (int j = 0; j < columns[0].size(); j++) {
-        for (int i = 0; i < columns.size(); i++) {
-            if (columns[i].size() > j) {
-                std::cout << columns[i][j] << " ";
-            }
+    for (int i = 0; i < columns.size(); i++) {
+		std::cout << std::endl;
+        for (int j = 0; j < columns[i].size(); j++) {
+            std::cout << columns[i][j] << ' ';
         }
-        std::cout << std::endl;
     }
-        
+
     for (int i = 0; i < row; i++) {
+        std::cout << std::endl;
         for (int j = 0; j < rows[i].size(); j++) {
             std::cout << rows[i][j] << " ";
         }
-        for (int j = 0; j < 8 - rows[i].size()*2; j++) {
+        for (int j = 0; j < 8 - rows[i].size() * 2; j++) {
             std::cout << " ";
         }
-        for (int j = 0; j < col; j++) { 
-            std::cout << matrix[i][j] << " ";
+        for (int j = 0; j < col; j++) {
+            std::cout << player_matrix[i][j] << ' ';
         }
-        std::cout << std::endl;
     }
 }
 
@@ -157,16 +170,17 @@ bool compare(std::vector<std::vector<char>> player_matrix, std::vector<std::vect
 
 void saveUser(){
     std::ifstream file("users.txt");
+    char currentName[100];
+    char currentPassword[100];
+    char currentLevel[3];
+
     if (!file.is_open()) {
-        std::cout << "Error: Unable to open file." << std::endl;
+        std::cout << "Error: Unable to open file.3" << std::endl;
         return;
     }
 
-    char currentName[10];
-    char currentPassword[10];
-    char currentLevel[3];
-    while (file >> currentName >> currentLevel) {
-        if (strcmp(currentName, username) == 0 && strcmp(currentPassword, password) == 0) {
+    while (file >> currentName >> currentPassword >> currentLevel) {
+        if (strcmp(currentName, username) == 0) {
             strcpy(currentLevel, level);
             break;
         }
@@ -174,8 +188,8 @@ void saveUser(){
     file.close();
 
     std::ofstream outfile("users.txt");
-    if (!file.is_open()) {
-        std::cout << "Error: Unable to open file." << std::endl;
+    if (!outfile.is_open()) {
+        std::cout << "Error: Unable to open file.4" << std::endl;
         return;
     }
 
@@ -192,7 +206,7 @@ void saveProgress(std::vector<std::vector<char>> player_matrix){
 
     std::ofstream file(filename);
     if (!file.is_open()) {
-        std::cout << "Error: Unable to open file." << std::endl;
+        std::cout << "Error: Unable to open file.5" << std::endl;
         return;
     }
 
@@ -247,17 +261,20 @@ void playGame() {
     
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cout << "Error: Unable to open file." << std::endl;
+        std::cout << "Error: Unable to open file.6" << std::endl;
         return;
     }
 
     std::vector<std::vector<char>> solved_matrix;
-    char c;
-    while (file >> c) {
+    char element;
+    while (file >> element) {
         std::vector<char> row;
-        while (c != '\n' && !file.eof()) {
-            row.push_back(c);
-            file >> c;
+        row.push_back(element);
+        while (file >> element) {
+            row.push_back(element);
+            if(file.peek()=='\n' || file.peek()==EOF){
+                break;
+            }
         }
         solved_matrix.push_back(row);
     }
@@ -266,12 +283,18 @@ void playGame() {
     int rows = solved_matrix.size();
     int cols = solved_matrix[0].size();
 
-    std::vector<std::vector<char>> player_matrix(rows, std::vector<char>(cols, 'O'));
+    std::vector<std::vector<char>> player_matrix(rows, std::vector<char>(cols));
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            player_matrix[i][j] = 'O';
+        }
+    }
 
     char cmd;
     do{
-        showNonogram(player_matrix, rows, cols);
+        showNonogram(solved_matrix, rows, cols, player_matrix);
 
+        std::cout << std::endl;
         std::cout << "You currently have " << mistakes << " lives." << std::endl;
         std::cout << std::endl;
 
@@ -301,7 +324,7 @@ void playGame() {
             }
             else mistakes--;
         }
-    }while(cmd != 'e' || mistakes != 0);
+    }while(cmd != 'e' && mistakes != 0);
 
     if(mistakes == 0){
         std::cout << "You've lost!" << std::endl;
@@ -321,21 +344,22 @@ void loadGame() {
 
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cout << "Error: Unable to open file." << std::endl;
+        std::cout << "Error: Unable to open file.7" << std::endl;
         return;
     }
 
     std::vector<std::vector<char>> player_matrix;
-    int row, col;
-    while (file >> row >> col) {
-        if (player_matrix.size() < row + 1) {
-            player_matrix.resize(row + 1);
+    char element;
+    while (file >> element) {
+        std::vector<char> row;
+        row.push_back(element);
+        while (file >> element) {
+            row.push_back(element);
+            if(file.peek()=='\n' || file.peek()==EOF){
+                break;
+            }
         }
-        if (player_matrix[row].size() < col + 1) {
-            player_matrix[row].resize(col + 1);
-        }
-
-        file >> player_matrix[row][col];
+        player_matrix.push_back(row);
     }
     file.close();
 
@@ -345,29 +369,33 @@ void loadGame() {
 
     std::ifstream file_solved(solved_filename);
     if (!file_solved.is_open()) {
-        std::cout << "Error: Unable to open file1." << std::endl;
+        std::cout << "Error: Unable to open file.8" << std::endl;
         return;
     }
 
     std::vector<std::vector<char>> solved_matrix;
     char c;
-    while (file >> c) {
+    while (file_solved >> element) {
         std::vector<char> row;
-        while (c != '\n' && !file.eof()) {
-            row.push_back(c);
-            file >> c;
+        row.push_back(element);
+        while (file_solved >> element) {
+            row.push_back(element);
+            if(file_solved.peek()=='\n' || file_solved.peek()==EOF){
+                break;
+            }
         }
         solved_matrix.push_back(row);
     }
-    file.close();
+    file_solved.close();
     
     int rows = solved_matrix.size();
     int cols = solved_matrix[0].size();
 
     char cmd;
     do{
-        showNonogram(player_matrix, rows, cols);
+        showNonogram(solved_matrix, rows, cols, player_matrix);
 
+        std::cout << std::endl;
         std::cout << "You currently have " << mistakes << " lives." << std::endl;
         std::cout << std::endl;
 
@@ -385,7 +413,7 @@ void loadGame() {
             if(compare(player_matrix, solved_matrix)){
                 std::cout << "Congrats! You've finished this level!" << std::endl;
                 visualize(player_matrix);
-                if((int(level[0]) - 48) < 5){
+                if((int(level[0]) - 48 < 5)){
                     level[0] = (int(level[0]) - 47) + '0';
                     saveUser();
                     return;
@@ -397,7 +425,7 @@ void loadGame() {
             }
             else mistakes--;
         }
-    }while(cmd != 'e' || mistakes != 0);
+    }while(cmd != 'e' && mistakes != 0);
 
     if(mistakes == 0){
         std::cout << "You've lost!" << std::endl;
