@@ -1,0 +1,4 @@
+admin admin 1_1
+g++ .\main.cpp1_1 1_1
+admin2 admin2 1_1
+admin1 admin1 1_1
