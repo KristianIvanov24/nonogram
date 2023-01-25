@@ -29,7 +29,7 @@ bool verifyData() {
     std::ifstream file("users.txt");
 
     if (!file.is_open()) {
-        std::cout << "Error: Unable to open file.1" << std::endl;
+        std::cout << "Error: Unable to open file." << std::endl;
         return false;
     }
 
@@ -40,21 +40,8 @@ bool verifyData() {
 
     char fileUsername[10], filePassword[10];
     while (file >> fileUsername >> filePassword >> level) {
-        bool usernameMatch = true, passwordMatch = true;
-        for (int i = 0; username[i] != '\0'; i++) {
-            if (username[i] != fileUsername[i]) {
-                usernameMatch = false;
-                break;
-            }
-        }
-        for (int i = 0; i < password[i] != '\0'; i++) {
-            if (password[i] != filePassword[i]) {
-                passwordMatch = false;
-                break;
-            }
-        }
-        if (usernameMatch && passwordMatch) {
-            file.close();
+        if (!(strcmp(fileUsername, username) && strcmp(filePassword, password))) {
+			file.close();
             return true;
         }
     }
@@ -72,7 +59,7 @@ void userReg() {
     std::ofstream file("users.txt", std::ios::app);
 
     if (!file.is_open()) {
-        std::cout << "Error: Unable to open file.2" << std::endl;
+        std::cout << "Error: Unable to open file." << std::endl;
         return;
     }
 
@@ -108,20 +95,27 @@ void showNonogram(std::vector<std::vector<char>> matrix, int row, int col, std::
         for (int j = 0; j < row; j++) {
             if (matrix[j][i] == '#') {
                 count++;
+				columns[i].push_back(0);
             }
             else if (matrix[j][i] == 'O' && count != 0) {
                 columns[i].push_back(count);
                 count = 0;
             }
+			else columns[i].push_back(0);
         }
         if (count != 0)
-            columns[i].push_back(count);
+            columns[i][col-1] = count;
     }
 
     for (int i = 0; i < columns.size(); i++) {
 		std::cout << std::endl;
+		std::cout << "        ";
         for (int j = 0; j < columns[i].size(); j++) {
-            std::cout << columns[i][j] << ' ';
+			if(columns[j][i]!= 0 && i != columns.size() - 1 && columns[j][i+1] == 0)
+				columns[j][i+1] = columns[j][i];
+			else if(columns[j][i] != 0)
+				std::cout << columns[j][i] << ' ';
+			else std::cout << "  ";
         }
     }
 
@@ -175,12 +169,13 @@ void saveUser(){
     char currentLevel[3];
 
     if (!file.is_open()) {
-        std::cout << "Error: Unable to open file.3" << std::endl;
+        std::cout << "Error: Unable to open file." << std::endl;
         return;
     }
 
     while (file >> currentName >> currentPassword >> currentLevel) {
         if (strcmp(currentName, username) == 0) {
+			strcpy(currentPassword, password);
             strcpy(currentLevel, level);
             break;
         }
@@ -189,11 +184,11 @@ void saveUser(){
 
     std::ofstream outfile("users.txt");
     if (!outfile.is_open()) {
-        std::cout << "Error: Unable to open file.4" << std::endl;
-        return;
+        std::cout << "Error: Unable to open file." << std::endl;
+        return;	
     }
 
-    outfile << currentName << " " << currentPassword << " " << currentLevel << std::endl;
+    outfile << currentName << " " << password << " " << currentLevel << std::endl;
     outfile.close();
 }
 
@@ -206,7 +201,7 @@ void saveProgress(std::vector<std::vector<char>> player_matrix){
 
     std::ofstream file(filename);
     if (!file.is_open()) {
-        std::cout << "Error: Unable to open file.5" << std::endl;
+        std::cout << "Error: Unable to open file." << std::endl;
         return;
     }
 
@@ -261,7 +256,7 @@ void playGame() {
     
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cout << "Error: Unable to open file.6" << std::endl;
+        std::cout << "Error: Unable to open file." << std::endl;
         return;
     }
 
@@ -344,7 +339,7 @@ void loadGame() {
 
     std::ifstream file(filename);
     if (!file.is_open()) {
-        std::cout << "Error: Unable to open file.7" << std::endl;
+        std::cout << "Error: Unable to open file." << std::endl;
         return;
     }
 
@@ -369,7 +364,7 @@ void loadGame() {
 
     std::ifstream file_solved(solved_filename);
     if (!file_solved.is_open()) {
-        std::cout << "Error: Unable to open file.8" << std::endl;
+        std::cout << "Error: Unable to open file." << std::endl;
         return;
     }
 
@@ -387,7 +382,7 @@ void loadGame() {
         solved_matrix.push_back(row);
     }
     file_solved.close();
-    
+	
     int rows = solved_matrix.size();
     int cols = solved_matrix[0].size();
 
